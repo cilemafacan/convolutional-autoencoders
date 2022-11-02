@@ -17,6 +17,8 @@ model_*/
 *.so
 
 # Distribution / packaging
+logs/
+logs-img1296/
 .Python
 build/
 develop-eggs/
