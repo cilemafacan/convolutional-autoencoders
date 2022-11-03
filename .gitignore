@@ -12,13 +12,12 @@ model_*/
 
 #tests
 deneme*
-
+log*
 # C extensions
 *.so
 
 # Distribution / packaging
-logs/
-logs-img1296/
+logs*
 .Python
 build/
 develop-eggs/

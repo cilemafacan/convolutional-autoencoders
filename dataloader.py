@@ -1,5 +1,7 @@
 import numpy as np
 import torch
+import random
+
 from PIL import Image
 
 
@@ -43,6 +45,7 @@ class PatchDataLoader():
 
             image_h_s = dst.crop((0, 0, dst.width, self.size - 1))
             out = self.get_concat_h(dst, image_h_s)
+            #out.save("padding.png")
             if self.transform is not None:
                 self.data = self.transform(out).to("cuda")
 
@@ -78,7 +81,7 @@ class PatchDataLoader():
                 
                 if len(self.patch) == self.batch_size:
                     break
-        
+        #random.shuffle(self.patch)
         stack = torch.stack(self.patch)
         return stack
 

@@ -18,19 +18,16 @@ class CNN(nn.Module):
                 nn.Conv2d(in_channels=128, out_channels=256, kernel_size=3, stride=1),
                 nn.PReLU(),
                 nn.AvgPool2d(kernel_size=2))
-        self.flatten = nn.Flatten()
-        self.bottleneck = nn.Sequential(
-                nn.Linear(in_features=5*5*ch[4], out_features=2048),
-                nn.PReLU(),
-                nn.Linear(in_features=2048, out_features=1024),
-                nn.PReLU(),
-                nn.Linear(in_features=1024, out_features=2048),
-                nn.PReLU(),
-                nn.Linear(in_features=2048, out_features=5*5*ch[4]),
-                nn.PReLU()
-        )
-        #self.unflatten  = nn.Unflatten(dim=1, unflattened_size=(ch[4],5,5))
+                #nn.Conv2d(in_channels=256, out_channels=512, kernel_size=3, stride=1),
+                #nn.PReLU(),
+                #nn.Conv2d(in_channels=512, out_channels=1024, kernel_size=3, stride=1),
+                #nn.PReLU())
+                
         self.decoder = nn.Sequential(
+                #nn.ConvTranspose2d(in_channels=1024, out_channels=512, kernel_size=3, stride=1),
+                #nn.PReLU(),
+                #nn.ConvTranspose2d(in_channels=512, out_channels=256, kernel_size=3, stride=1),
+                #nn.PReLU(),
                 nn.Upsample(scale_factor=2),
                 nn.ConvTranspose2d(in_channels=256, out_channels=128, kernel_size=3, stride=1),
                 nn.PReLU(),
@@ -46,9 +43,7 @@ class CNN(nn.Module):
         
     def forward(self, x):
         encoder = self.encoder(x)
-        flatten = self.flatten(encoder)
-        bottleneck = self.bottleneck(flatten).view(-1,256,5,5)
-        decoder = self.decoder(bottleneck)
+        decoder = self.decoder(encoder)
         sigmoid    = nn.Sigmoid()
         output     = sigmoid(decoder)
 
