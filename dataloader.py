@@ -22,32 +22,26 @@ class PatchDataLoader():
         self.last_idx = 0
         self.data = None
 
-    def get_concat_w(self, im1, im2):
-        dst = Image.new('RGB', (im1.width + im2.width, im1.height))
-        dst.paste(im1, (0, 0))
-        dst.paste(im2, (im1.width, 0))
-        return dst
-
-    def get_concat_h(self, im1, im2):
-        dst = Image.new('RGB', (im1.width, im1.height + im2.height))
-        dst.paste(im1, (0, 0))
-        dst.paste(im2, (0, im1.height))
-        return dst
-
     def iterdata(self):
         if self.data == None:
-            image = Image.open(self.dataset[self.last_idx])
+            #print(self.dataset[self.last_idx])
+            image = Image.open(self.dataset[self.last_idx]).convert("RGB")
             self.height =image.height
             self.width = image.width
 
-            image_w_s = image.crop((0, 0, self.size - 1, self.height))
-            dst = self.get_concat_w(image, image_w_s)
-
-            image_h_s = dst.crop((0, 0, dst.width, self.size - 1))
-            out = self.get_concat_h(dst, image_h_s)
-            #out.save("padding.png")
+            imageArray = np.asarray(image)
+            
+            valueX = imageArray[0:imageArray.shape[0], 0:self.size - 1, :]
+            imageArray1 = np.hstack((imageArray, valueX))
+            
+            valueY = imageArray1[0:self.size - 1, 0:imageArray1.shape[1] , :]
+            imageArray2 = np.vstack((imageArray1, valueY))
+            
+            imageTest = Image.fromarray(imageArray2)
+            imageTest.save(f"padding_{self.last_idx}.png")
+            
             if self.transform is not None:
-                self.data = self.transform(out).to("cuda")
+                self.data = self.transform(imageArray2).to("cuda")
 
             self.last_idx += 1
 
@@ -56,14 +50,15 @@ class PatchDataLoader():
     def __getitem__(self, idx):
 
         img, width, height = self.iterdata()
-        
         self.patch = []
+        
         if self.last_y >=  height:
-            #print("Last x:", self.last_x, "Last y:", self.last_y)
-
             self.last_x = 0
             self.last_y = 0
+            self.data = None
+            
             if self.last_idx == len(self.dataset):
+                self.last_idx = 0
                 return None
         
         for y in range(self.last_y,  height, self.stride):
@@ -81,7 +76,7 @@ class PatchDataLoader():
                 
                 if len(self.patch) == self.batch_size:
                     break
-        #random.shuffle(self.patch)
+        random.shuffle(self.patch)
         stack = torch.stack(self.patch)
         return stack
 
