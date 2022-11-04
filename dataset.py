@@ -6,25 +6,23 @@ from PIL import Image, ImageFile
 Image.MAX_IMAGE_PIXELS = 933120000
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
-format = ('.jpg', '.jpeg', '.png', '.bmp', '.tif', '.tiff')
-
+supportedExt = ('.jpg', '.jpeg', '.png', '.bmp', '.tif', '.tiff')
 
 class MyDataset():
-    def __init__(self, src_dir):
+    def __init__(self, srcDir):
 
-        self.root = src_dir
-        self.path_arr = []
+        self.root = srcDir
+        self.pathArr = []
         for root, dirs, files in os.walk(self.root):
             for file in files:
-                if file.endswith(format):
+                if file.endswith(supportedExt):
                     path = os.path.join(root,file)
-
-                    self.path_arr.append(path)
+                    self.pathArr.append(path)
 
     def __getitem__(self, index):
-        data =  self.path_arr[index]
+        data =  self.pathArr[index]
         return data
 
     def __len__(self):
-        return len(self.path_arr)
+        return len(self.pathArr)
         
