@@ -17,17 +17,24 @@ class CNN(nn.Module):
                 nn.AvgPool2d(kernel_size=2),
                 nn.Conv2d(in_channels=128, out_channels=256, kernel_size=3, stride=1),
                 nn.PReLU(),
-                nn.AvgPool2d(kernel_size=2))
-                #nn.Conv2d(in_channels=256, out_channels=512, kernel_size=3, stride=1),
-                #nn.PReLU(),
-                #nn.Conv2d(in_channels=512, out_channels=1024, kernel_size=3, stride=1),
-                #nn.PReLU())
+                nn.AvgPool2d(kernel_size=2),
+                nn.Conv2d(in_channels=256, out_channels=512, kernel_size=3, stride=1),
+                nn.PReLU(),
+                nn.Conv2d(in_channels=512, out_channels=1024, kernel_size=3, stride=1),
+                nn.PReLU(),)
+        self.flatten = nn.Flatten()
+        self.bottleneck = nn.Sequential(
+            nn.Linear(in_features=1024, out_features=512),
+            nn.PReLU(),
+            nn.Linear(in_features=512, out_features=1024),
+            nn.PReLU(),
+        )
                 
         self.decoder = nn.Sequential(
-                #nn.ConvTranspose2d(in_channels=1024, out_channels=512, kernel_size=3, stride=1),
-                #nn.PReLU(),
-                #nn.ConvTranspose2d(in_channels=512, out_channels=256, kernel_size=3, stride=1),
-                #nn.PReLU(),
+                nn.ConvTranspose2d(in_channels=1024, out_channels=512, kernel_size=3, stride=1),
+                nn.PReLU(),
+                nn.ConvTranspose2d(in_channels=512, out_channels=256, kernel_size=3, stride=1),
+                nn.PReLU(),
                 nn.Upsample(scale_factor=2),
                 nn.ConvTranspose2d(in_channels=256, out_channels=128, kernel_size=3, stride=1),
                 nn.PReLU(),
@@ -43,7 +50,9 @@ class CNN(nn.Module):
         
     def forward(self, x):
         encoder = self.encoder(x)
-        decoder = self.decoder(encoder)
+        flatten = self.flatten(encoder)
+        bottleneck = self.bottleneck(flatten).view(-1,1024,1,1)
+        decoder = self.decoder(bottleneck)
         sigmoid    = nn.Sigmoid()
         output     = sigmoid(decoder)
 
