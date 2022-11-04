@@ -6,7 +6,7 @@ __pycache__/
 # image
 image
 *.png
-
+2_images_training
 #logs
 model_*/
 
